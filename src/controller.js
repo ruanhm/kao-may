@@ -1,4 +1,5 @@
 const fs = require('fs');
+const _ = require('lodash');
 
 function addControllers(router, dir) {
     fs.readdirSync(__dirname + '/' + dir)
@@ -8,31 +9,46 @@ function addControllers(router, dir) {
         .forEach((f) => {
             console.log(`process controller:${f}...`);
             let mapping = require(__dirname + '/' + dir + '/' + f);
-            let path = f.substring(0, f.length - 3);
-            addMapping(router, mapping, path);
+            let route = f.substring(0, f.length - 3);
+            addMapping(router, mapping, route);
         })
 }
 
 /* 
     controller统一输出格式
-    httpMethod:{
-        url:''
-        method:''
-    }
+    httpMethod:function||Set(function)
     httpMethod:get||post
-    utl:可为空或不定义，为空或不定义时controller名字映射为对应路由
+    controller名字映射为对应路由
     method:调用的方法
 */
-function addMapping(router, mapping, path) {
+function addMapping(router, mapping, route) {
+    route = '/' + route + '/';
     for (let m in mapping) {
-        const httpMethod = m.toLowerCase();
-        path = mapping[m].url || '/' + path + '/';
+        const httpMethod = m.toLowerCase();       
         if (router[httpMethod]) {
-            router[httpMethod](path, mapping[m].method);
-            console.log(`register URL mapping:${httpMethod} ${path}`);
+            if (_.isFunction(mapping[m])) {
+                if (mapping[m].name.toLowerCase() == httpMethod) {
+                    router[httpMethod](route, mapping[m]);
+                    console.log(`register URL mapping:${httpMethod} ${route}`);
+                }
+                else {
+                    router[httpMethod](route + mapping[m].name, mapping[m]);
+                    console.log(`register URL mapping:${httpMethod} ${route}${mapping[m].name}`);
+
+                }
+            }
+            else if (_.isSet(mapping[m])) {
+                for (let method of mapping[m].values()) {
+                    router[httpMethod](route + method.name, method);
+                    console.log(`register URL mapping:${httpMethod} ${route}${method.name}`);
+                }
+            }
+            else {
+                console.log(`invalid URL: ${route}`);
+            }
         }
         else {
-            console.log(`invalid URL: ${path}`);
+            console.log(`invalid URL: ${route}`);
         }
     }
 }
