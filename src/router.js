@@ -43,11 +43,24 @@ router.get('/ToolsAjaxGet/:QueryName',async(ctx,next)=>
         console.error(ex);
         dbHelper.close();
     }
+    
 })
 
 router.get('/ToolsAjaxGridData/:QueryName',async(ctx,next)=>
 {
-    ctx.response.body=ctx.url
+    var dbHelper = new DBHelper();
+    try{
+        await dbHelper.beginTransaction();
+        await dbHelper.executeSql(`insert into a values(1,1)`);
+        await dbHelper.executeSql(`insert into c values(1,null)`);
+        await dbHelper.commitTransaction();
+        dbHelper.close();
+    }
+    catch(ex){
+       console.log(ex) 
+       await dbHelper.rollbackTransaction();
+        dbHelper.close();
+    }
 })
 
 router.post('/AjaxPost/:BizName',async(ctx,next)=>
