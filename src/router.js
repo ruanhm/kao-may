@@ -4,7 +4,8 @@ const Router = require('koa-router');
 const router = new Router();
 const DBHelper=require('../lib/db-helper');
 const TYPES = require('tedious').TYPES;
-const Biz=require('../lib/biz');
+const Biz=require('../lib/biz').Biz;
+const BizManage=require('../lib/biz').BizManage;
 controller(router);
 router.get('/', async (ctx, next) => {
     await ctx.render('/ind/index');
@@ -25,8 +26,9 @@ router.get('/AjaxGet/:QueryName',async(ctx,next)=>
 
 router.get('/AjaxGridData/:QueryName',async(ctx,next)=>
 {
-    var a=await Biz.getBiz(ctx.params.QueryName)
-    ctx.response.body=a
+    var a=await BizManage.getBiz(ctx.params.QueryName)
+    var sql=BizManage.exportBiz(a);
+    ctx.response.body={sql:sql}
 })
 
 router.get('/ToolsAjaxGet/:QueryName',async(ctx,next)=>
