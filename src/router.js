@@ -26,9 +26,10 @@ router.get('/AjaxGet/:QueryName',async(ctx,next)=>
 
 router.get('/AjaxGridData/:QueryName',async(ctx,next)=>
 {
-    var a=await BizManage.getBiz(ctx.params.QueryName)
-    var sql=BizManage.exportBiz(a);
-    ctx.response.body={sql:sql}
+    var a=await Biz.getBiz(ctx.params.QueryName)
+    var b=await a.execute();
+    //var sql=BizManage.exportBiz(a);
+    ctx.response.body={sql:b}
 })
 
 router.get('/ToolsAjaxGet/:QueryName',async(ctx,next)=>
@@ -65,7 +66,11 @@ router.get('/ToolsAjaxGridData/:QueryName',async(ctx,next)=>
 
 router.post('/AjaxPost/:BizName',async(ctx,next)=>
 {
-    ctx.response.body=ctx.url
+    console.log(ctx.params.BizName)
+    var a=await Biz.getBiz(ctx.params.BizName)
+    var b=a._getSqlParamaters(ctx.request.body)
+    console.log(b);
+    ctx.response.body={sql:a}
 })
 
 router.post('/ToolsAjaxPost/:BizName',async(ctx,next)=>
